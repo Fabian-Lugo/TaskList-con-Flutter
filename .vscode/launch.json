@@ -1,0 +1,9 @@
+{
+    "configurations": [
+    {
+        "name": "App Test",
+        "type": "dart",
+        "request": "launch",
+    }
+    ]
+}
