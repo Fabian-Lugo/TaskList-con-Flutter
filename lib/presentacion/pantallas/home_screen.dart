@@ -1,19 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:test_03/presentacion/pantallas/login_screen.dart';
 import 'package:test_03/utils/button_style.dart';
 import 'package:test_03/utils/color.dart';
 
-class HomaPage extends StatefulWidget {
+class HomaPage extends StatelessWidget {
   const HomaPage({super.key});
 
-  @override
-  State<HomaPage> createState() => _HomaPageState();
-}
 
-class _HomaPageState extends State<HomaPage> {
   @override
   Widget build(BuildContext context) {
+  
+  void changePageLogin() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => LoginPage())
+    );
+  }
+
     return Scaffold(
       body: Column(
         children: [
@@ -28,7 +33,7 @@ class _HomaPageState extends State<HomaPage> {
           const SizedBox(height: 5),
           Center(
             child: Text(
-              'Bienvenido a TaskList\nVamos a empezar',
+              'Bienvenido a TaskList\nVamos a empezar:',
               style: const TextStyle(color: ColorApp.color_04, fontSize: 35, fontWeight: FontWeight.bold),
               textAlign: TextAlign.left,
             ),
@@ -87,7 +92,7 @@ class _HomaPageState extends State<HomaPage> {
           ),
           const SizedBox(height: 40),
           ElevatedButton(
-            onPressed: () {}, 
+            onPressed: changePageLogin, 
             style: ElevatedButton.styleFrom(
               backgroundColor: ColorApp.color_06,
               padding: EdgeInsets.symmetric(horizontal: 145, vertical: 15),
