@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:test_03/presentacion/pantallas/login_screen.dart';
+import 'package:test_03/screens/login_screen.dart';
 import 'package:test_03/utils/button_style.dart';
 import 'package:test_03/utils/color.dart';
 

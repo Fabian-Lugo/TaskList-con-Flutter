@@ -1,14 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:test_03/models/task_model.dart';
 import 'package:test_03/utils/color.dart';
 import 'package:test_03/utils/input_style.dart';
-
-class TaskItem {
-  String? title;
-  bool isDone;
-
-  TaskItem({required this.title, this.isDone = false}); 
-}
+import 'package:test_03/database/db_helper.dart';
 
 class TaskList extends StatefulWidget {
   const TaskList({super.key});
@@ -22,14 +17,27 @@ class _TaskListState extends State<TaskList> {
   final key = GlobalKey<FormState>();
   List<TaskItem> tasks = [];
 
-  void test() {
+  @override
+  void initState() {
+    super.initState();
+    _chargeFromSQL();
+  }
+
+  void _chargeFromSQL() async {
+    final data = await DBHelper.getTasks();
+    setState(() {
+      tasks = data;
+    });
+  }
+
+  void controlLogin() async {
     String addText = controllerText.text.trim();
 
     if (key.currentState!.validate() && controllerText.text.isNotEmpty) {
-      setState(() {
-        tasks.add(TaskItem(title: addText));
-      });
+      final newTask = TaskItem(title: addText);
+      await DBHelper.insert(newTask);
       controllerText.clear();
+      _chargeFromSQL();
     } 
   }
 
@@ -107,13 +115,13 @@ class _TaskListState extends State<TaskList> {
                                 controlAffinity: ListTileControlAffinity.leading,
                                 activeColor: ColorApp.color_08,
                                 value: tasks[index].isDone, 
-                                onChanged: (bool? newValue) {
-                                  setState(() {
+                                onChanged: (bool? newValue) async {
                                     tasks[index].isDone = newValue!;
-                                  });
+                                    await DBHelper.update(tasks[index]);
+                                    setState(() {});
                                 },
                                 title: Text(
-                                  '${tasks[index].title}',
+                                  tasks[index].title,
                                   style: GoogleFonts.poppins(
                                     color: tasks[index].isDone ? Colors.grey : ColorApp.color_01, 
                                     fontWeight: FontWeight.w500, 
@@ -122,7 +130,10 @@ class _TaskListState extends State<TaskList> {
                                   ),
                                 ),
                                 secondary: IconButton(
-                                  onPressed: () => setState(() => tasks.removeAt(index)), 
+                                  onPressed: () async {
+                                    await DBHelper.delete(tasks[index].id!);
+                                    _chargeFromSQL();
+                                  }, 
                                   icon: const Icon(Icons.delete, color: ColorApp.color_11,)
                                 ),
                               ),
@@ -152,7 +163,7 @@ class _TaskListState extends State<TaskList> {
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: IconButton(
-                                    onPressed: test, 
+                                    onPressed: controlLogin, 
                                     icon: Icon(Icons.add, color: ColorApp.color_02,)
                                   ),
                                 ),
