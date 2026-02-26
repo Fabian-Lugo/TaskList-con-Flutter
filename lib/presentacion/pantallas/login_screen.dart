@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:test_03/presentacion/pantallas/tasklist_screen.dart';
 import 'package:test_03/utils/color.dart';
 import 'package:test_03/utils/input_style.dart';
 import 'package:test_03/utils/message.dart';
@@ -17,13 +18,12 @@ class _LoginPageState extends State<LoginPage> {
    final TextEditingController controllerText = TextEditingController();
    final TextEditingController controllerPassword = TextEditingController();
    final key = GlobalKey<FormState>();
+   String? errorMessage;
    bool obscurePassword = true;
    bool rememberMe = false;
-   String textValidator = '';
-   String passwordValidator = '';
 
   void messageFuture() {
-    MessageFloat.custom(context: context, color: ColorApp.color_11, text: 'Proximamente');
+    MessageFloat.custom(context: context, color: ColorApp.color_06, text: 'Proximamente');
   }
 
   void seePassword() {
@@ -36,11 +36,13 @@ class _LoginPageState extends State<LoginPage> {
     if (key.currentState!.validate()) {
       setState(() {
         if (controllerText.text == 'Fabian' && controllerPassword.text == 'test123') {
-          /*Navigator.push(
+          errorMessage = null;
+          Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) mes)
-          );*/
-          messageFuture();
+            MaterialPageRoute(builder: (context) => TaskList())
+          );
+        } else {
+          errorMessage = 'Credenciales incorrectas';
         }
       });
     }
@@ -140,7 +142,7 @@ class _LoginPageState extends State<LoginPage> {
                                 errorBorder: InputStyles.customBorder(color: ColorApp.color_11),
                                 focusedErrorBorder: InputStyles.customBorder(color: ColorApp.color_11),
                               ),
-                            validator: (value) => (value?.trim().isEmpty ?? true) ? 'Ingresa tu contraseña' : null,
+                            validator: (value) => (value?.trim().isEmpty ?? true) ? 'Ingresa tu correo' : null,
                             ),
                             const SizedBox(height: 15),
                             TextFormField(
@@ -166,6 +168,11 @@ class _LoginPageState extends State<LoginPage> {
                               validator: (value) => (value?.trim().isEmpty ?? true) ? 'Ingresa tu contraseña' : null,
                             ),
                             const SizedBox(height: 5),
+                            if (errorMessage != null) 
+                              Text(errorMessage!,
+                              style: GoogleFonts.poppins(color: ColorApp.color_11, fontSize: 15, fontWeight: FontWeight.w600),
+                            ),
+                            const SizedBox(height: 10),
                             CheckboxListTile(
                               title: const Text(
                                 'Recordarme',
