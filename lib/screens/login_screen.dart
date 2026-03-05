@@ -48,8 +48,8 @@ class _LoginPageState extends State<LoginPage> {
     if (key.currentState!.validate()) {
       setState(() {
         bool isValidUser = users.any((u) => 
-            u.user == controllerText.text && 
-            u.password == controllerPassword.text);
+            u.user == controllerText.text.trim() && 
+            u.password == controllerPassword.text.trim());
 
         if (isValidUser) {
           errorMessage = null;
