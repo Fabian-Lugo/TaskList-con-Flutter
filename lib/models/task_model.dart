@@ -7,17 +7,17 @@ class TaskItem {
 
   Map<String, dynamic> toMap() {
     return {
-      'title' : title,
-      'id' : id,
-      'isDone' : isDone ? 1 : 0,
+      'title': title,
+      if (id != null) 'id': id,
+      'isDone': isDone,
     };
   }
 
   factory TaskItem.fromMap(Map<String, dynamic> map) {
     return TaskItem(
       title: map['title'],
-      id: map['id'],
-      isDone: map['isDone'] == 1,
+      id: map['id'] as int?,
+      isDone: map['isDone'] == true || map['isDone'] == 1,
     );
   }
 }

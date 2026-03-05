@@ -23,7 +23,7 @@ class _TaskListState extends State<TaskList> {
     _chargeFromSQL();
   }
 
-  void _chargeFromSQL() async {
+  Future<void> _chargeFromSQL() async {
     final data = await DBHelper.getTasks();
     setState(() {
       tasks = data;
@@ -31,14 +31,24 @@ class _TaskListState extends State<TaskList> {
   }
 
   void controlLogin() async {
-    String addText = controllerText.text.trim();
+    final String addText = controllerText.text.trim();
+    if (addText.isEmpty) return;
 
-    if (key.currentState!.validate() && controllerText.text.isNotEmpty) {
-      final newTask = TaskItem(title: addText);
-      await DBHelper.insert(newTask);
-      controllerText.clear();
-      _chargeFromSQL();
-    } 
+    // Calcular nuevo ID localmente
+    final int newId = tasks.isEmpty
+        ? 1
+        : tasks.map((t) => t.id ?? 0).reduce((a, b) => a > b ? a : b) + 1;
+
+    final newTask = TaskItem(title: addText, id: newId, isDone: false);
+
+    // Actualizar UI inmediatamente
+    setState(() {
+      tasks.add(newTask);
+    });
+    controllerText.clear();
+
+    // Guardar en storage en background
+    await DBHelper.insert(newTask);
   }
 
   @override
@@ -114,27 +124,33 @@ class _TaskListState extends State<TaskList> {
                               child: CheckboxListTile(
                                 controlAffinity: ListTileControlAffinity.leading,
                                 activeColor: ColorApp.color_08,
-                                value: tasks[index].isDone, 
-                                onChanged: (bool? newValue) async {
+                                value: tasks[index].isDone,
+                                onChanged: (bool? newValue) {
+                                  setState(() {
                                     tasks[index].isDone = newValue!;
-                                    await DBHelper.update(tasks[index]);
-                                    setState(() {});
+                                  });
+                                  DBHelper.update(tasks[index]); // background
                                 },
                                 title: Text(
                                   tasks[index].title,
                                   style: GoogleFonts.poppins(
-                                    color: tasks[index].isDone ? Colors.grey : ColorApp.color_01, 
-                                    fontWeight: FontWeight.w500, 
+                                    color: tasks[index].isDone ? Colors.grey : ColorApp.color_01,
+                                    fontWeight: FontWeight.w500,
                                     fontSize: 18,
                                     decoration: tasks[index].isDone ? TextDecoration.lineThrough : TextDecoration.none,
                                   ),
                                 ),
                                 secondary: IconButton(
-                                  onPressed: () async {
-                                    await DBHelper.delete(tasks[index].id!);
-                                    _chargeFromSQL();
-                                  }, 
-                                  icon: const Icon(Icons.delete, color: ColorApp.color_11,)
+                                  onPressed: () {
+                                    final int? idToDelete = tasks[index].id;
+                                    setState(() {
+                                      tasks.removeAt(index);
+                                    });
+                                    if (idToDelete != null) {
+                                      DBHelper.delete(idToDelete); // background
+                                    }
+                                  },
+                                  icon: const Icon(Icons.delete, color: ColorApp.color_11),
                                 ),
                               ),
                             );
@@ -142,33 +158,31 @@ class _TaskListState extends State<TaskList> {
                         ),
                       ),
                       const SizedBox(height: 10),
-                      Column(
+                      Row(
                         children: [
-                          Form(
-                            key: key,
-                            child: TextFormField(
+                          Expanded(
+                            child: TextField(
                               controller: controllerText,
                               keyboardType: TextInputType.text,
+                              onSubmitted: (_) => controlLogin(),
                               decoration: InputDecoration(
                                 hintText: 'Añadir tarea',
                                 hintStyle: GoogleFonts.poppins(color: ColorApp.color_10, fontSize: 15),
                                 isDense: false,
-                                  enabledBorder: InputStyles.customBorder(color: ColorApp.color_09),
-                                  focusedBorder: InputStyles.customBorder(color: ColorApp.color_09),
-                                  errorBorder: InputStyles.customBorder(color: ColorApp.color_11),
-                                  focusedErrorBorder: InputStyles.customBorder(color: ColorApp.color_11),
-                                  suffixIcon: Container(
-                                  decoration: BoxDecoration(
-                                    color: ColorApp.color_04,
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: IconButton(
-                                    onPressed: controlLogin, 
-                                    icon: Icon(Icons.add, color: ColorApp.color_02,)
-                                  ),
-                                ),
+                                enabledBorder: InputStyles.customBorder(color: ColorApp.color_09),
+                                focusedBorder: InputStyles.customBorder(color: ColorApp.color_09),
                               ),
-                              validator: (value) => (value?.trim().isEmpty ?? true) ? 'Ingrese una tarea' : null,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: ColorApp.color_04,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: IconButton(
+                              onPressed: controlLogin,
+                              icon: const Icon(Icons.add, color: ColorApp.color_02),
                             ),
                           ),
                         ],

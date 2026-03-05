@@ -76,7 +76,7 @@ class _LoginPageState extends State<LoginPage> {
         body: SingleChildScrollView(
           scrollDirection: Axis.vertical,
           child: Container(
-            height: size.height,
+            constraints: BoxConstraints(minHeight: size.height),
             width: size.width,
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -92,6 +92,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 const SizedBox(height: 30),
                 SvgPicture.asset('assets/images/image_login.svg', width: 150),
